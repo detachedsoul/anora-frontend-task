@@ -20,7 +20,7 @@ interface IFormInput
 
 const FormInput = forwardRef<HTMLInputElement, IFormInput>(
 	(
-		{ error = "", className, placeholder, onChange: change, ...props },
+		{ error = "", className, placeholder, onChange: change, type = "text", ...props },
 		ref,
 	) => {
 		return (
@@ -33,7 +33,7 @@ const FormInput = forwardRef<HTMLInputElement, IFormInput>(
                     id={props?.id ?? props?.name}
                     placeholder={placeholder}
                     {...props}
-                    type="text"
+                    type={type}
                     onChange={(e) => {
                         change(e);
                     }}

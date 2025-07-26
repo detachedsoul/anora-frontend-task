@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Index from "./_components";
 
 export const metadata: Metadata = {
 	title: "Taskify | Dashboard",
@@ -7,9 +8,7 @@ export const metadata: Metadata = {
 
 const Dashboard = () => {
 	return (
-		<p className="grid place-content-center h-dvh">
-			This is your dashboard
-		</p>
+		<Index />
 	);
 };
 

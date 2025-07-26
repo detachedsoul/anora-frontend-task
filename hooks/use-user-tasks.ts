@@ -21,7 +21,7 @@ export interface UserTask {
 }
 
 type SortBy = "priority" | "dueDate";
-type FilterBy = "all" | "completed" | "pending";
+type FilterBy = "all" | "completed" | "pending" | "low" | "high" | "medium";
 
 interface GroupedTasks {
 	today: Task[];
@@ -54,7 +54,6 @@ interface UserTaskStore {
 	// Rehydrate store after the component mounts
 	rehydrateStore: () => void
 }
-
 
 const priorityOrder: Record<TaskPriority, number> = {
 	high: 1,
@@ -201,9 +200,19 @@ export const useUserTasks = create<UserTaskStore>()(
 				if (!tasks) return;
 
 				if (filter === "completed")
-					return tasks.filter((t) => t.status === "completed");
+                    return tasks.filter((t) => t.status === "completed");
+
 				if (filter === "pending")
-					return tasks.filter((t) => t.status === "pending");
+                    return tasks.filter((t) => t.status === "pending");
+
+                if (filter === "low")
+                    return tasks.filter((t) => t.priority === "low");
+
+                if (filter === "medium")
+					return tasks.filter((t) => t.priority === "medium");
+
+                if (filter === "high")
+					return tasks.filter((t) => t.priority === "high");
 
 				return tasks;
 			},

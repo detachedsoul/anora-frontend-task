@@ -9,11 +9,13 @@ export const useHasHydrated = () => {
 	} = useUserTasks((state) => state);
 
 	useEffect(() => {
-		setHasHydrated(true);
+        if (typeof window !== "undefined") {
+            setHasHydrated(true);
+        }
 	}, []);
 
     useEffect(() => {
-		if (hasHydrated) {
+		if (hasHydrated && typeof window !== "undefined") {
 			rehydrateStore();
 		}
 	}, [hasHydrated, rehydrateStore]);
