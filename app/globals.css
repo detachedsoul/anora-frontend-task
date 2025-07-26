@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+@theme {
+	--font-urbanist: var(--font-urbanist);
+	--font-ibm-plex-mono: var(--font-ibm-plex-mono);
+
+	--color-brand-red: #dc2626;
+	--color-brand-green: #22c55e;
+	--color-brand-info: #0ea5e9;
+	--color-brand-warning: #facc15;
+}
+
+@layer components {
+	button {
+		@apply cursor-pointer;
+	}
+
+	.header {
+		@apply font-ibm-plex-mono font-semibold;
+	}
+
+	.input {
+		@apply py-2.5 px-3 w-full bg-gray-900 border border-gray-900 rounded-lg focus:outline focus:outline-offset-3 focus:outline-gray-800 placeholder:text-inherit;
+	}
+
+	.btn {
+		@apply py-2.5 px-3 w-full bg-[#7c3aed] border border-gray-900 rounded-lg hover:outline hover:outline-offset-3 hover:outline-[#7c3aed]/20 font-ibm-plex-mono font-semibold;
+	}
+}
