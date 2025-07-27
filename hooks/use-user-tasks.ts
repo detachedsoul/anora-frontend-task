@@ -42,6 +42,7 @@ interface GroupedTasks {
 interface UserTaskStore {
 	users: UserTask[];
 	currentUser: string | null;
+	searchQuery: string;
 	filteredTasks: Task[];
 	filterKey: FilterBy;
 	currentFilter: FilterBy;
@@ -55,6 +56,7 @@ interface UserTaskStore {
 	clearStorage: () => void;
 	logoutCurrentUser: () => void;
 	updateFilteredTasks: () => void;
+	setSearchQuery: (query: string) => void;
 	toggleTaskStatus: (taskId: string) => void;
 
 	setFilteredTasks: (tasks: Task[]) => void;
@@ -64,7 +66,7 @@ interface UserTaskStore {
 	getUser: () => UserTask | undefined;
 	getTasks: (sortBy?: SortBy) => Task[] | undefined;
 	filterTasks: (filter: FilterBy, taskList?: Task[]) => Task[] | undefined;
-	searchTasks: (query: string) => Task[] | undefined;
+	searchTasks: (query: string, taskList?: Task[]) => Task[] | undefined;
 	groupTasksByTime: () => GroupedTasks;
 
 	rehydrateStore: () => void;
@@ -80,26 +82,42 @@ export const useUserTasks = create<UserTaskStore>()(
 	persist(
 		(set, get) => ({
 			users: [],
-            currentUser: null,
-            currentFilter: "all",
+			currentUser: null,
+			currentFilter: "all",
 			filteredTasks: [],
 			filterKey: "all",
+			searchQuery: "",
 
-            updateFilteredTasks: () => {
-                const { filterKey, filterTasks, getTasks } = get();
-
+			updateFilteredTasks: () => {
+				const {
+					filterKey,
+					searchQuery,
+					filterTasks,
+					searchTasks,
+					getTasks,
+				} = get();
                 const filtered = filterTasks(filterKey, getTasks());
 
-                set({ filteredTasks: filtered ?? [] });
-            },
+				const searched = searchQuery
+					? searchTasks(searchQuery, filtered)
+                    : filtered;
+
+				set({ filteredTasks: searched ?? [] });
+			},
+
+			setSearchQuery: (query: string) => {
+				set({ searchQuery: query });
+
+				get().updateFilteredTasks();
+			},
 
 			setUserName: (name) => {
-                set((state) => {
+				set((state) => {
 					if (state.users.find((u) => u.name === name)) return state;
 
 					return { users: [...state.users, { name, tasks: [] }] };
-				})
-            },
+				});
+			},
 
 			setCurrentUser: (name) => {
 				const exists = get().users.some((u) => u.name === name);
@@ -108,10 +126,10 @@ export const useUserTasks = create<UserTaskStore>()(
 			},
 
 			setFilterKey: (key) => {
-                set({ filterKey: key });
+				set({ filterKey: key });
 
-                get().updateFilteredTasks();
-            },
+				get().updateFilteredTasks();
+			},
 
 			setFilteredTasks: (tasks) => set({ filteredTasks: tasks }),
 
@@ -305,30 +323,30 @@ export const useUserTasks = create<UserTaskStore>()(
 					return { users };
 				});
 
-                get().updateFilteredTasks();
+				get().updateFilteredTasks();
 			},
 
-            filterTasks: (filter, taskList) => {
-                const tasks = taskList ?? get().getTasks();
-                if (!tasks) return;
+			filterTasks: (filter, taskList) => {
+				const tasks = taskList ?? get().getTasks();
+				if (!tasks) return;
 
-                switch (filter) {
-                    case "completed":
-                        return tasks.filter((t) => t.status === "completed");
-                    case "pending":
-                        return tasks.filter((t) => t.status === "pending");
-                    case "low":
-                    case "medium":
-                    case "high":
-                        return tasks.filter((t) => t.priority === filter);
-                    case "overdue":
-                        return get().groupTasksByTime().overdue;
-                    case "upcoming":
-                        return get().groupTasksByTime().upcoming;
-                    default:
-                        return tasks;
-                }
-            },
+				switch (filter) {
+					case "completed":
+						return tasks.filter((t) => t.status === "completed");
+					case "pending":
+						return tasks.filter((t) => t.status === "pending");
+					case "low":
+					case "medium":
+					case "high":
+						return tasks.filter((t) => t.priority === filter);
+					case "overdue":
+						return get().groupTasksByTime().overdue;
+					case "upcoming":
+						return get().groupTasksByTime().upcoming;
+					default:
+						return tasks;
+				}
+			},
 
 			clearAllTasks: () => {
 				const name = get().currentUser;
@@ -346,6 +364,7 @@ export const useUserTasks = create<UserTaskStore>()(
 				if (typeof window !== "undefined") {
 					localStorage.removeItem("user-task-store");
 				}
+
 				set({ users: [], currentUser: null });
 			},
 
@@ -353,6 +372,7 @@ export const useUserTasks = create<UserTaskStore>()(
 
 			getUser: () => {
 				const name = get().currentUser;
+
 				return get().users.find((u) => u.name === name);
 			},
 
@@ -383,9 +403,9 @@ export const useUserTasks = create<UserTaskStore>()(
 
 			logoutCurrentUser: () => set({ currentUser: null }),
 
-			searchTasks: (query) => {
-				const tasks = get().getTasks();
-				if (!tasks) return;
+			searchTasks: (query, taskList) => {
+				const tasks = taskList ?? get().getTasks();
+				if (!tasks) return [];
 
 				const lower = query.toLowerCase();
 

@@ -155,8 +155,10 @@ const TaskList = () => {
 
     const { deleteTask, toggleTaskStatus } = useUserTasks();
 
-    const setFilterKey = useUserTasks((state) => state.setFilterKey);
+    const searchQuery = useUserTasks((s) => s.searchQuery);
+	const setSearchQuery = useUserTasks((s) => s.setSearchQuery);
 
+    const setFilterKey = useUserTasks((state) => state.setFilterKey);
     const filterKey = useUserTasks((state) => state.filterKey);
 
     const filterTasks = useUserTasks((state) => state.filterTasks);
@@ -193,6 +195,14 @@ const TaskList = () => {
 				filterKey={filterKey}
 				setFilterKey={setFilterKey}
 				filterTasks={(key) => filterTasks(key) ?? []}
+			/>
+
+			<input
+				className="input"
+				type="text"
+				placeholder="Search tasks..."
+				value={searchQuery}
+				onChange={(e) => setSearchQuery(e.target.value)}
 			/>
 
 			{reorderedTasks.length === 0 ? (
