@@ -14,9 +14,20 @@ const taskSchema = z.object({
 	title: z.string().min(1, "Title is required"),
 	description: z.string().min(2, "Task description is required"),
 	status: z.enum(["pending", "completed"]),
-	dueDate: z
-		.string()
-		.refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date" }),
+	dueDate: z.string().refine(
+		(val) => {
+			const selectedDate = new Date(val);
+
+			const today = new Date();
+
+			selectedDate.setHours(0, 0, 0, 0);
+
+			today.setHours(0, 0, 0, 0);
+
+			return selectedDate >= today;
+		},
+		{ message: "Due date cannot be in the past" },
+	),
 	priority: z.enum(["low", "medium", "high"]),
 });
 
