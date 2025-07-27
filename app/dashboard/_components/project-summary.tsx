@@ -32,6 +32,7 @@ const ProjectSummary = () => {
 					bg="bg-indigo-600"
 					border="border-indigo-600"
 					afterBorder="after:border-indigo-600"
+                    filterKey="all"
 				/>
 
                 <SummaryCard
@@ -39,7 +40,8 @@ const ProjectSummary = () => {
 					label="Pending"
 					bg="bg-brand-info"
 					border="border-brand-info"
-					afterBorder="after:border-brand-info"
+                    afterBorder="after:border-brand-info"
+                    filterKey="pending"
 				/>
 
 				<SummaryCard
@@ -47,7 +49,8 @@ const ProjectSummary = () => {
 					label="Completed"
 					bg="bg-brand-green"
 					border="border-brand-green"
-					afterBorder="after:border-brand-green"
+                    afterBorder="after:border-brand-green"
+                    filterKey="completed"
 				/>
 
 				<SummaryCard
@@ -55,7 +58,8 @@ const ProjectSummary = () => {
 					label="Due"
 					bg="bg-brand-red"
 					border="border-brand-red"
-					afterBorder="after:border-brand-red"
+                    afterBorder="after:border-brand-red"
+                    filterKey="overdue"
 				/>
 
 				<SummaryCard
@@ -63,7 +67,8 @@ const ProjectSummary = () => {
 					label="Upcoming"
 					bg="bg-purple-500"
 					border="border-purple-500"
-					afterBorder="after:border-purple-500"
+                    afterBorder="after:border-purple-500"
+                    filterKey="upcoming"
 				/>
 
 				<SummaryCard
@@ -71,7 +76,8 @@ const ProjectSummary = () => {
 					label="High Priority"
 					bg="bg-rose-500"
 					border="border-rose-500"
-					afterBorder="after:border-rose-500"
+                    afterBorder="after:border-rose-500"
+                    filterKey="high"
 				/>
 
 				<SummaryCard
@@ -79,7 +85,8 @@ const ProjectSummary = () => {
 					label="Medium Priority"
 					bg="bg-amber-600"
 					border="border-amber-600"
-					afterBorder="after:border-amber-600"
+                    afterBorder="after:border-amber-600"
+                    filterKey="medium"
 				/>
 
 				<SummaryCard
@@ -88,6 +95,7 @@ const ProjectSummary = () => {
 					bg="bg-neutral-500"
 					border="border-neutral-500"
 					afterBorder="after:border-neutral-500"
+                    filterKey="low"
 				/>
 			</div>
 

@@ -23,7 +23,7 @@ export interface UserTask {
 }
 
 type SortBy = "priority" | "dueDate";
-type FilterBy =
+export type FilterBy =
 	| "all"
 	| "completed"
 	| "pending"
@@ -54,6 +54,7 @@ interface UserTaskStore {
 	clearAllTasks: () => void;
 	clearStorage: () => void;
 	logoutCurrentUser: () => void;
+	updateFilteredTasks: () => void;
 	toggleTaskStatus: (taskId: string) => void;
 
 	setFilteredTasks: (tasks: Task[]) => void;

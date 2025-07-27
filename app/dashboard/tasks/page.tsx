@@ -1,4 +1,4 @@
-import TaskList from "./_components/TaskList";
+import TaskList from "./_components/task-list";
 
 const Tasks = () => {
     return (

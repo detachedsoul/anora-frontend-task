@@ -5,7 +5,7 @@ import TaskFilterTabs from "./task-filter-tabs";
 import AddTask from "@/app/dashboard/_components/add-task";
 import { Task, useUserTasks } from "@/hooks/use-user-tasks";
 import { formatDate } from "@/utils/format-date";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/utils/cn";
 
 import {
@@ -23,16 +23,6 @@ import {
 	useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-
-type FilterKey =
-	| "all"
-	| "pending"
-	| "completed"
-	| "overdue"
-	| "upcoming"
-	| "high"
-	| "medium"
-	| "low";
 
 const getPriorityStyles = (priority: string) => {
 	switch (priority) {
@@ -130,7 +120,8 @@ const SortableTask = ({
 					onClick={onEdit}
 				>
 					Edit
-				</button>
+                </button>
+
 				<button
 					className={cn(
 						"text-xs px-3 py-1 rounded-full border transition",
@@ -159,13 +150,13 @@ const SortableTask = ({
 };
 
 const TaskList = () => {
-	// const [filterKey, setFilterKey] = useState<FilterKey>("all");
 	const [taskToEdit, setTaskToEdit] = useState<Task | undefined>(undefined);
 	const [isModalActive, setIsModalActive] = useState(false);
 
     const { deleteTask, toggleTaskStatus } = useUserTasks();
 
     const setFilterKey = useUserTasks((state) => state.setFilterKey);
+
     const filterKey = useUserTasks((state) => state.filterKey);
 
     const filterTasks = useUserTasks((state) => state.filterTasks);
@@ -173,7 +164,8 @@ const TaskList = () => {
     const tasks = useUserTasks((s) => s.filteredTasks);
 
 	const sensors = useSensors(
-		useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+        useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+
 		useSensor(TouchSensor, { activationConstraint: { distance: 5 } }),
 	);
 

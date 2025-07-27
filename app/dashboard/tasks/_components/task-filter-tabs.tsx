@@ -1,5 +1,5 @@
 import FilterButton from "./filter-buttons";
-import { Task } from "@/hooks/use-user-tasks";
+import { FilterBy, Task } from "@/hooks/use-user-tasks";
 
 const filters = [
 	{ key: "all", label: "All", badgeColor: "bg-indigo-600" },
@@ -12,20 +12,10 @@ const filters = [
 	{ key: "low", label: "Low", badgeColor: "bg-neutral-500" },
 ] as const;
 
-type FilterKey =
-	| "all"
-	| "pending"
-	| "completed"
-	| "overdue"
-	| "upcoming"
-	| "high"
-	| "medium"
-	| "low";
-
 type Props = {
-	filterKey: FilterKey;
-	setFilterKey: React.Dispatch<React.SetStateAction<FilterKey>>;
-	filterTasks: (key: FilterKey) => Task[];
+	filterKey: FilterBy;
+	setFilterKey: (key: FilterBy) => void;
+	filterTasks: (key: FilterBy) => Task[];
 };
 
 const TaskFilterTabs: React.FC<Props> = ({
