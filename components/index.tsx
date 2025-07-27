@@ -39,23 +39,23 @@ const Index = () => {
 
     const { currentUser, setUserName, setCurrentUser } = store;
 
-    if (currentUser) {
-		redirect("/dashboard");
-	}
-
 	const createUser = () => {
 		const name = getValues("name");
 
-		setUserName(name);
-		setCurrentUser(name);
-
-		successToast({
+        successToast({
 			header: "Registration Successful",
 			message: "Logged in successfully.",
 		});
 
+		setUserName(name);
+		setCurrentUser(name);
+
         replace("/dashboard");
-	};
+    };
+
+    if (currentUser) {
+		redirect("/dashboard");
+	}
 
 	return (
 		<form className="flex flex-col place-content-center w-full gap-8 min-h-dvh h-dvh max-md:p-4 md:w-1/3 md:mx-auto">

@@ -1,7 +1,8 @@
 "use client";
 
 import TaskFilterTabs from "./task-filter-tabs";
-import { useUserTasks } from "@/hooks/use-user-tasks";
+import AddTask from "@/app/dashboard/_components/add-task";
+import { Task, useUserTasks } from "@/hooks/use-user-tasks";
 import { formatDate } from "@/utils/format-date";
 import { useState } from "react";
 import { cn } from "@/utils/cn";
@@ -30,18 +31,24 @@ const getPriorityStyles = (priority: string) => {
 };
 
 const getStatusStyles = (status: string) => {
-	return status === "completed" ? "bg-brand-green text-white" : "bg-yellow-400 text-black";
+	return status === "completed"
+		? "bg-brand-green text-white"
+		: "bg-yellow-400 text-black";
 };
 
 const TaskList = () => {
 	const [filterKey, setFilterKey] = useState<FilterKey>("all");
 
-	const { filterTasks } = useUserTasks();
+	const [taskToEdit, setTaskToEdit] = useState<Task | undefined>(undefined);
+
+	const [isModalActive, setIsModalActive] = useState(false);
+
+	const { filterTasks, deleteTask, toggleTaskStatus } = useUserTasks();
 
 	const tasks = filterTasks(filterKey) ?? [];
 
 	return (
-		<div className="grid gap-8">
+		<div className="grid gap-8 relative">
 			<TaskFilterTabs
 				filterKey={filterKey}
 				setFilterKey={setFilterKey}
@@ -49,7 +56,7 @@ const TaskList = () => {
 			/>
 
 			{tasks.length === 0 ? (
-				<p className="text-gray-500 text-center mt-10">
+				<p className="text-brand-red text-center mt-10">
 					No tasks found for this filter.
 				</p>
 			) : (
@@ -60,7 +67,7 @@ const TaskList = () => {
 							key={task.id}
 						>
 							<div className="flex items-center justify-between">
-								<h2 className="text-base header text-gray-800">
+								<h2 className="text-base header text-[#111827]">
 									{task.title}
 								</h2>
 
@@ -87,7 +94,7 @@ const TaskList = () => {
 								</div>
 							</div>
 
-							<p className="text-sm text-gray-600">
+							<p className="text-sm text-[#111827]">
 								{task.description}
 							</p>
 
@@ -108,10 +115,62 @@ const TaskList = () => {
 									)}
 								</span>
 							</div>
+
+							<div className="flex gap-2 mt-2 flex-wrap">
+								<button
+									className={cn(
+										"text-xs px-3 py-1 rounded-full border transition",
+										"border-blue-500 text-blue-600 hover:bg-blue-50",
+									)}
+									type="button"
+									onClick={() => {
+										setIsModalActive(true);
+
+										setTaskToEdit(task);
+									}}
+								>
+									Edit
+								</button>
+
+								<button
+									className={cn(
+										"text-xs px-3 py-1 rounded-full border transition",
+										{
+											"border-green-500 text-green-600 hover:bg-green-50":
+												task.status !== "completed",
+											"border-yellow-500 text-yellow-600 hover:bg-yellow-50":
+												task.status === "completed",
+										},
+									)}
+									onClick={() => toggleTaskStatus(task.id)}
+									type="button"
+								>
+									{task.status === "completed"
+										? "Mark as Pending"
+										: "Mark as Completed"}
+								</button>
+
+								<button
+									className={cn(
+										"text-xs px-3 py-1 rounded-full border transition",
+										"border-red-500 text-red-600 hover:bg-red-50",
+									)}
+									onClick={() => deleteTask(task.id)}
+									type="button"
+								>
+									Delete
+								</button>
+							</div>
 						</div>
 					))}
 				</div>
 			)}
+
+			<AddTask
+				isModalActive={isModalActive}
+				setIsModalActive={setIsModalActive}
+				taskToEdit={taskToEdit}
+			/>
 		</div>
 	);
 };

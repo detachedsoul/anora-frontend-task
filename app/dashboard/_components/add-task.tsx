@@ -1,12 +1,14 @@
 import FormInput from "@/components/form/input";
 import Button from "@/components/form/button";
 import successToast from "@/utils/success-toast";
+import errorToast from "@/utils/error-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useUserTasks } from "@/hooks/use-user-tasks";
+import { Task, useUserTasks } from "@/hooks/use-user-tasks";
 import { cn } from "@/utils/cn";
 import { XIcon } from "lucide-react";
+import { useEffect } from "react";
 
 const taskSchema = z.object({
 	title: z.string().min(1, "Title is required"),
@@ -23,11 +25,13 @@ type TaskInput = z.infer<typeof taskSchema>;
 const AddTask = ({
 	isModalActive,
 	setIsModalActive,
+	taskToEdit,
 }: {
 	isModalActive: boolean;
 	setIsModalActive: React.Dispatch<React.SetStateAction<boolean>>;
+	taskToEdit?: Task;
 }) => {
-	const { addTask, rehydrateStore } = useUserTasks();
+	const { addTask, updateTask, rehydrateStore } = useUserTasks();
 
 	const {
 		register,
@@ -47,20 +51,42 @@ const AddTask = ({
 		},
 	});
 
-	const createTask = (data: TaskInput) => {
-		addTask(data);
+    const isEditing = Boolean(taskToEdit);
+
+	useEffect(() => {
+		if (taskToEdit) {
+			reset(taskToEdit);
+		}
+	}, [taskToEdit, reset]);
+
+	const handleForm = (data: TaskInput) => {
+        if (isEditing) {
+            if (!taskToEdit?.id) {
+                errorToast({
+                    header: "Missing Parameters",
+                    message: "Please pass in a valid ID"
+                });
+            }
+
+			updateTask(taskToEdit?.id ?? "", data);
+		} else {
+			addTask(data);
+		}
 
 		reset();
 
+		setIsModalActive(false);
+
 		rehydrateStore();
 
-        setIsModalActive(false);
-
 		successToast({
-			header: "Task Added",
-			message: "New task added successfully.",
+			header: isEditing ? "Task Updated" : "Task Added",
+			message: isEditing
+				? "Task updated successfully."
+				: "New task added successfully.",
 		});
 	};
+
 
 	return (
 		<div
@@ -88,7 +114,7 @@ const AddTask = ({
 
 			<form
 				className="grid gap-6"
-				onSubmit={handleSubmit(createTask)}
+				onSubmit={handleSubmit(handleForm)}
 			>
 				<label
 					className="grid gap-2"
