@@ -12,6 +12,7 @@ import {
 	DndContext,
 	closestCenter,
 	PointerSensor,
+	TouchSensor,
 	useSensor,
 	useSensors,
 } from "@dnd-kit/core";
@@ -82,7 +83,7 @@ const SortableTask = ({
 			<div className="flex items-center justify-between">
 				<h2 className="text-base header text-[#111827]">
 					{task.title}
-                </h2>
+				</h2>
 
 				<div className="flex gap-2">
 					<span
@@ -92,7 +93,7 @@ const SortableTask = ({
 						)}
 					>
 						{task.priority}
-                    </span>
+					</span>
 
 					<span
 						className={cn(
@@ -114,7 +115,7 @@ const SortableTask = ({
 						new Date(task.createdAt),
 						"ddd, MMM Do, YYYY - h:mm A",
 					)}
-                </span>
+				</span>
 
 				<span>
 					Due:{" "}
@@ -158,38 +159,41 @@ const SortableTask = ({
 };
 
 const TaskList = () => {
-	const [filterKey, setFilterKey] = useState<FilterKey>("all");
+	// const [filterKey, setFilterKey] = useState<FilterKey>("all");
 	const [taskToEdit, setTaskToEdit] = useState<Task | undefined>(undefined);
 	const [isModalActive, setIsModalActive] = useState(false);
 
-	const { filterTasks, deleteTask, toggleTaskStatus } = useUserTasks();
+    const { deleteTask, toggleTaskStatus } = useUserTasks();
 
-	const filtered = useMemo(() => filterTasks(filterKey) ?? [], [filterKey, filterTasks]);
+    const setFilterKey = useUserTasks((state) => state.setFilterKey);
+    const filterKey = useUserTasks((state) => state.filterKey);
 
-	const [tasks, setTasks] = useState<Task[]>(filtered);
+    const filterTasks = useUserTasks((state) => state.filterTasks);
 
-	useEffect(() => {
-		setTasks(filtered);
-	}, [filtered]);
+    const tasks = useUserTasks((s) => s.filteredTasks);
 
 	const sensors = useSensors(
 		useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+		useSensor(TouchSensor, { activationConstraint: { distance: 5 } }),
 	);
 
+	const [reorderedTasks, setReorderedTasks] = useState<Task[]>(tasks);
+
+	useEffect(() => {
+        setReorderedTasks(tasks);
+	}, [tasks]);
+
 	const handleDragEnd = (event: DragEndEvent) => {
-	const { active, over } = event;
+		const { active, over } = event;
+		if (!over || active.id === over.id) return;
 
-	if (!over) return;
+		const oldIndex = reorderedTasks.findIndex((t) => t.id === active.id);
+		const newIndex = reorderedTasks.findIndex((t) => t.id === over.id);
 
-	if (active.id !== over.id) {
-		const oldIndex = tasks.findIndex((t) => t.id === active.id);
+        const newOrder = arrayMove(reorderedTasks, oldIndex, newIndex);
 
-		const newIndex = tasks.findIndex((t) => t.id === over.id);
-
-		setTasks(arrayMove(tasks, oldIndex, newIndex));
-	}
-};
-
+		setReorderedTasks(newOrder);
+	};
 
 	return (
 		<div className="grid gap-8 relative">
@@ -199,7 +203,7 @@ const TaskList = () => {
 				filterTasks={(key) => filterTasks(key) ?? []}
 			/>
 
-			{tasks.length === 0 ? (
+			{reorderedTasks.length === 0 ? (
 				<p className="text-brand-red text-center mt-10">
 					No tasks found for this filter.
 				</p>
@@ -210,11 +214,11 @@ const TaskList = () => {
 					onDragEnd={handleDragEnd}
 				>
 					<SortableContext
-						items={tasks.map((task) => task.id)}
+						items={reorderedTasks.map((task) => task.id)}
 						strategy={rectSortingStrategy}
 					>
 						<div className="grid gap-4 md:grid-cols-2">
-							{tasks.map((task) => (
+							{reorderedTasks.map((task) => (
 								<SortableTask
 									key={task.id}
 									task={task}

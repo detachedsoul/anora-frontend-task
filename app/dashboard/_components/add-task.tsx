@@ -1,6 +1,5 @@
 import FormInput from "@/components/form/input";
 import Button from "@/components/form/button";
-import successToast from "@/utils/success-toast";
 import errorToast from "@/utils/error-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -89,13 +88,6 @@ const AddTask = ({
 		setIsModalActive(false);
 
 		rehydrateStore();
-
-		successToast({
-			header: isEditing ? "Task Updated" : "Task Added",
-			message: isEditing
-				? "Task updated successfully."
-				: "New task added successfully.",
-		});
 	};
 
 

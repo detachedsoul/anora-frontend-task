@@ -1,4 +1,5 @@
 import errorToast from "@/utils/error-toast";
+import successToast from "@/utils/success-toast";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { nanoid } from "nanoid";
@@ -41,8 +42,10 @@ interface GroupedTasks {
 interface UserTaskStore {
 	users: UserTask[];
 	currentUser: string | null;
+	filteredTasks: Task[];
+	filterKey: FilterBy;
+	currentFilter: FilterBy;
 
-	// Actions
 	setUserName: (name: string) => void;
 	setCurrentUser: (name: string) => void;
 	addTask: (task: Omit<Task, "id" | "createdAt">) => void;
@@ -53,15 +56,16 @@ interface UserTaskStore {
 	logoutCurrentUser: () => void;
 	toggleTaskStatus: (taskId: string) => void;
 
-	// Getters
+	setFilteredTasks: (tasks: Task[]) => void;
+	setFilterKey: (key: FilterBy) => void;
+
 	getUserNames: () => string[];
 	getUser: () => UserTask | undefined;
 	getTasks: (sortBy?: SortBy) => Task[] | undefined;
-	filterTasks: (filter: FilterBy) => Task[] | undefined;
+	filterTasks: (filter: FilterBy, taskList?: Task[]) => Task[] | undefined;
 	searchTasks: (query: string) => Task[] | undefined;
 	groupTasksByTime: () => GroupedTasks;
 
-	// Rehydrate store after the component mounts
 	rehydrateStore: () => void;
 }
 
@@ -75,20 +79,40 @@ export const useUserTasks = create<UserTaskStore>()(
 	persist(
 		(set, get) => ({
 			users: [],
-			currentUser: null,
+            currentUser: null,
+            currentFilter: "all",
+			filteredTasks: [],
+			filterKey: "all",
 
-			setUserName: (name) =>
-				set((state) => {
+            updateFilteredTasks: () => {
+                const { filterKey, filterTasks, getTasks } = get();
+
+                const filtered = filterTasks(filterKey, getTasks());
+
+                set({ filteredTasks: filtered ?? [] });
+            },
+
+			setUserName: (name) => {
+                set((state) => {
 					if (state.users.find((u) => u.name === name)) return state;
 
 					return { users: [...state.users, { name, tasks: [] }] };
-				}),
+				})
+            },
 
 			setCurrentUser: (name) => {
 				const exists = get().users.some((u) => u.name === name);
 
 				if (exists) set({ currentUser: name });
 			},
+
+			setFilterKey: (key) => {
+                set({ filterKey: key });
+
+                get().updateFilteredTasks();
+            },
+
+			setFilteredTasks: (tasks) => set({ filteredTasks: tasks }),
 
 			addTask: (task) => {
 				const name = get().currentUser;
@@ -104,8 +128,22 @@ export const useUserTasks = create<UserTaskStore>()(
 							createdAt: new Date().toISOString(),
 						};
 
+						successToast({
+							header: "Task Added Successfully",
+							message: "New task has been added successfully.",
+						});
+
 						return { ...user, tasks: [...user.tasks, newTask] };
 					});
+
+					const updatedUser = users.find((u) => u.name === name);
+
+					const filtered = get().filterTasks(
+						get().filterKey,
+						updatedUser?.tasks ?? [],
+					);
+
+					get().setFilteredTasks(filtered ?? []);
 
 					return { users };
 				});
@@ -128,13 +166,11 @@ export const useUserTasks = create<UserTaskStore>()(
 						const taskExists = user.tasks.some(
 							(task) => task.id === taskId,
 						);
-
 						if (!taskExists) {
 							errorToast({
 								header: "Invalid ID",
 								message: "No task found with the given ID.",
-                            });
-
+							});
 							return user;
 						}
 
@@ -142,8 +178,22 @@ export const useUserTasks = create<UserTaskStore>()(
 							task.id === taskId ? { ...task, ...updates } : task,
 						);
 
+						successToast({
+							header: "Updated Successfully",
+							message: "Task updated successfully.",
+						});
+
 						return { ...user, tasks: updatedTasks };
 					});
+
+					const updatedUser = users.find((u) => u.name === name);
+
+					const filtered = get().filterTasks(
+						get().filterKey,
+						updatedUser?.tasks ?? [],
+					);
+
+					get().setFilteredTasks(filtered ?? []);
 
 					return { users };
 				});
@@ -166,13 +216,11 @@ export const useUserTasks = create<UserTaskStore>()(
 						const taskExists = user.tasks.some(
 							(task) => task.id === taskId,
 						);
-
 						if (!taskExists) {
 							errorToast({
 								header: "Invalid ID",
 								message: "No task found with the given ID.",
 							});
-
 							return user;
 						}
 
@@ -180,8 +228,22 @@ export const useUserTasks = create<UserTaskStore>()(
 							(task) => task.id !== taskId,
 						);
 
+						successToast({
+							header: "Deletion Successful",
+							message: "Task deleted successfully.",
+						});
+
 						return { ...user, tasks: updatedTasks };
 					});
+
+					const updatedUser = users.find((u) => u.name === name);
+
+					const filtered = get().filterTasks(
+						get().filterKey,
+						updatedUser?.tasks ?? [],
+					);
+
+					get().setFilteredTasks(filtered ?? []);
 
 					return { users };
 				});
@@ -217,20 +279,55 @@ export const useUserTasks = create<UserTaskStore>()(
 						const updatedTasks = user.tasks.map((task) => {
 							if (task.id !== taskId) return task;
 
+							const newStatus: TaskStatus =
+								task.status === "pending"
+									? "completed"
+									: "pending";
+
 							return {
 								...task,
-								status: (task.status === "pending"
-									? "completed"
-									: "pending") as TaskStatus,
+								status: newStatus,
 							};
 						});
 
-						return { ...user, tasks: updatedTasks };
+						successToast({
+							header: "Task Status Changed",
+							message: "Task status changed successfully.",
+						});
+
+						return {
+							...user,
+							tasks: updatedTasks,
+						};
 					});
 
 					return { users };
 				});
+
+                get().updateFilteredTasks();
 			},
+
+            filterTasks: (filter, taskList) => {
+                const tasks = taskList ?? get().getTasks();
+                if (!tasks) return;
+
+                switch (filter) {
+                    case "completed":
+                        return tasks.filter((t) => t.status === "completed");
+                    case "pending":
+                        return tasks.filter((t) => t.status === "pending");
+                    case "low":
+                    case "medium":
+                    case "high":
+                        return tasks.filter((t) => t.priority === filter);
+                    case "overdue":
+                        return get().groupTasksByTime().overdue;
+                    case "upcoming":
+                        return get().groupTasksByTime().upcoming;
+                    default:
+                        return tasks;
+                }
+            },
 
 			clearAllTasks: () => {
 				const name = get().currentUser;
@@ -240,7 +337,6 @@ export const useUserTasks = create<UserTaskStore>()(
 					const users = state.users.map((user) =>
 						user.name === name ? { ...user, tasks: [] } : user,
 					);
-
 					return { users };
 				});
 			},
@@ -249,7 +345,6 @@ export const useUserTasks = create<UserTaskStore>()(
 				if (typeof window !== "undefined") {
 					localStorage.removeItem("user-task-store");
 				}
-
 				set({ users: [], currentUser: null });
 			},
 
@@ -257,7 +352,6 @@ export const useUserTasks = create<UserTaskStore>()(
 
 			getUser: () => {
 				const name = get().currentUser;
-
 				return get().users.find((u) => u.name === name);
 			},
 
@@ -288,38 +382,6 @@ export const useUserTasks = create<UserTaskStore>()(
 
 			logoutCurrentUser: () => set({ currentUser: null }),
 
-			filterTasks: (filter) => {
-				const tasks = get().getTasks();
-				if (!tasks) return;
-
-				if (filter === "all") return tasks;
-
-				if (filter === "completed")
-					return tasks.filter((t) => t.status === "completed");
-
-				if (filter === "pending")
-					return tasks.filter((t) => t.status === "pending");
-
-				if (filter === "low")
-					return tasks.filter((t) => t.priority === "low");
-
-				if (filter === "medium")
-					return tasks.filter((t) => t.priority === "medium");
-
-				if (filter === "high")
-					return tasks.filter((t) => t.priority === "high");
-
-				if (filter === "overdue") {
-					return get().groupTasksByTime().overdue;
-				}
-
-				if (filter === "upcoming") {
-					return get().groupTasksByTime().upcoming;
-				}
-
-				return tasks;
-			},
-
 			searchTasks: (query) => {
 				const tasks = get().getTasks();
 				if (!tasks) return;
@@ -335,21 +397,16 @@ export const useUserTasks = create<UserTaskStore>()(
 
 			groupTasksByTime: () => {
 				const tasks = get().getTasks() || [];
-
 				const today = new Date().toISOString().slice(0, 10);
 				const now = new Date(today);
 
 				const isToday = (d: string) => d === today;
-
 				const isUpcoming = (d: string) => new Date(d) > now;
-
 				const isOverdue = (d: string) => new Date(d) < now;
 
 				return {
 					today: tasks.filter((t) => isToday(t.dueDate)),
-
 					upcoming: tasks.filter((t) => isUpcoming(t.dueDate)),
-
 					overdue: tasks.filter((t) => isOverdue(t.dueDate)),
 				};
 			},
@@ -358,15 +415,12 @@ export const useUserTasks = create<UserTaskStore>()(
 				if (typeof window === "undefined") return;
 
 				const rawData = localStorage.getItem("user-task-store");
-
 				if (!rawData) return;
 
 				const parsed = JSON.parse(rawData).state;
-
 				if (parsed) {
 					set(() => ({
 						users: parsed.users,
-
 						currentUser: parsed.currentUser,
 					}));
 				}
