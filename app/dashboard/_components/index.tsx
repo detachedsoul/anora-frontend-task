@@ -17,9 +17,11 @@ const Index = () => {
 
     return (
 		<div className="grid gap-10">
-			<section className="sticky top-4 pb-2 bg-[#f9fafb] text-[#111827] dark:bg-gray-950 dark:text-[#f8fafc]">
+			<section className="sticky top-0 py-4 bg-[#f9fafb] text-[#111827] dark:bg-gray-950 dark:text-[#f8fafc] z-[9999]">
 				<div className="grid gap-1">
-					<h1 className="header text-2xl">Hi, {currentUser ?? ""} 👋</h1>
+					<h1 className="header text-2xl">
+						Hi, {currentUser ?? ""} 👋
+					</h1>
 
 					<p>
 						{formatDate(new Date(), "ddd, MMMM Do, YYYY - h:mm A")}

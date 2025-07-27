@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { nanoid } from "nanoid";
+import errorToast from "@/utils/error-toast";
 
 type TaskStatus = "pending" | "completed";
 type TaskPriority = "low" | "medium" | "high";
@@ -21,7 +22,7 @@ export interface UserTask {
 }
 
 type SortBy = "priority" | "dueDate";
-type FilterBy = "all" | "completed" | "pending" | "low" | "high" | "medium";
+type FilterBy = "all" | "completed" | "pending" | "low" | "high" | "medium" | "overdue" | "upcoming";
 
 interface GroupedTasks {
 	today: Task[];
@@ -103,11 +104,25 @@ export const useUserTasks = create<UserTaskStore>()(
 
 			updateTask: (taskId, updates) => {
 				const name = get().currentUser;
-				if (!name) return;
+                if (!name) {
+                    errorToast({
+						header: "Not Authorized",
+						message: "Invalid User.",
+                    });
+
+                    return;
+                }
 
 				set((state) => {
 					const users = state.users.map((user) => {
-						if (user.name !== name) return user;
+                        if (user.name !== name) {
+                            errorToast({
+                                header: "Not Authorized",
+                                message: "Invalid User."
+                            });
+
+                            return user;
+                        };
 
 						const tasks = user.tasks.map((task) =>
 							task.id === taskId ? { ...task, ...updates } : task,
@@ -122,11 +137,25 @@ export const useUserTasks = create<UserTaskStore>()(
 
 			deleteTask: (taskId) => {
 				const name = get().currentUser;
-				if (!name) return;
+				if (!name) {
+					errorToast({
+						header: "Not Authorized",
+						message: "Invalid User.",
+					});
+
+					return;
+				}
 
 				set((state) => {
 					const users = state.users.map((user) => {
-						if (user.name !== name) return user;
+						if (user.name !== name) {
+							errorToast({
+								header: "Not Authorized",
+								message: "Invalid User.",
+							});
+
+							return user;
+						}
 
 						const tasks = user.tasks.filter(
 							(task) => task.id !== taskId,
@@ -199,7 +228,10 @@ export const useUserTasks = create<UserTaskStore>()(
 				const tasks = get().getTasks();
 				if (!tasks) return;
 
-				if (filter === "completed")
+				if (filter === "all")
+                    return tasks;
+
+                if (filter === "completed")
                     return tasks.filter((t) => t.status === "completed");
 
 				if (filter === "pending")
@@ -212,9 +244,17 @@ export const useUserTasks = create<UserTaskStore>()(
 					return tasks.filter((t) => t.priority === "medium");
 
                 if (filter === "high")
-					return tasks.filter((t) => t.priority === "high");
+                    return tasks.filter((t) => t.priority === "high");
 
-				return tasks;
+                if (filter === "overdue") {
+					return get().groupTasksByTime().overdue;
+				}
+
+				if (filter === "upcoming") {
+					return get().groupTasksByTime().upcoming;
+				}
+
+                return tasks;
 			},
 
 			searchTasks: (query) => {
@@ -270,7 +310,6 @@ export const useUserTasks = create<UserTaskStore>()(
 		}),
 		{
 			name: "user-task-store",
-			skipHydration: true,
 			storage: createJSONStorage(() => localStorage),
 		},
 	),

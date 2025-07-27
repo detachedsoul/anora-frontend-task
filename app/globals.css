@@ -36,4 +36,13 @@
     .select-input {
         @apply form-select py-2.5 px-3 w-full bg-gray-900 border border-gray-900 rounded-lg focus:outline focus:outline-offset-3 focus:outline-gray-800 placeholder:text-inherit focus:border-gray-900 focus:ring-0
     }
+
+    .custom-scrollbar {
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+	}
+
+	.custom-scrollbar::-webkit-scrollbar {
+		display: none;
+	}
 }

@@ -1,14 +1,13 @@
 "use client";
 
 import SummaryCard from "./summary-card";
-import { ClipboardListIcon, XIcon } from "lucide-react";
+import AddTask from "./add-task";
+import { ClipboardListIcon } from "lucide-react";
 import { useUserTasks } from "@/hooks/use-user-tasks";
 import { useState } from "react";
-import { cn } from "@/utils/cn";
-import AddTask from "./add-task";
 
 const ProjectSummary = () => {
-	const { filterTasks, groupTasksByTime } = useUserTasks();
+	const { getTasks, filterTasks, groupTasksByTime } = useUserTasks();
 
 	const [isModalActive, setIsModalActive] = useState(false);
 
@@ -28,6 +27,14 @@ const ProjectSummary = () => {
 
 			<div className="grid grid-cols-2 items-start gap-4">
 				<SummaryCard
+					count={getTasks()?.length ?? 0}
+					label="Total"
+					bg="bg-indigo-600"
+					border="border-indigo-600"
+					afterBorder="after:border-indigo-600"
+				/>
+
+                <SummaryCard
 					count={filterTasks("pending")?.length ?? 0}
 					label="Pending"
 					bg="bg-brand-info"
@@ -51,7 +58,7 @@ const ProjectSummary = () => {
 					afterBorder="after:border-brand-red"
 				/>
 
-                <SummaryCard
+				<SummaryCard
 					count={groupTasksByTime()?.upcoming?.length ?? 0}
 					label="Upcoming"
 					bg="bg-purple-500"
@@ -84,31 +91,10 @@ const ProjectSummary = () => {
 				/>
 			</div>
 
-			<div
-				className={cn(
-					"fixed max-h-[90dvh] h-[90dvh] overflow-y-auto z-1024 bg-gray-950 border border-gray-950 w-[calc((100%-2rem)+0.25rem)] rounded-t-lg px-4 pb-4 pt-2 outline outline-offset-4 outline-double outline-gray-800 transition-all duration-300 ease-in-out md:w-[calc((80%-2rem)+0.25rem)] lg:w-[calc((50%-2rem)+0.25rem)] flex flex-col gap-10",
-					{
-						"bottom-0": isModalActive,
-						"-bottom-full": !isModalActive,
-					},
-				)}
-			>
-				<div className="ml-auto sticky top-0 -mr-2 bg-gray-800 z-50 rounded-full grid place-content-center">
-					<button
-						className="bg-gray-800 p-1 rounded-full"
-						type="button"
-						onClick={() => setIsModalActive(false)}
-						aria-label="Close modal"
-					>
-						<XIcon
-							strokeWidth={1.2}
-							size={18}
-						/>
-					</button>
-				</div>
-
-				<AddTask />
-			</div>
+			<AddTask
+				isModalActive={isModalActive}
+				setIsModalActive={setIsModalActive}
+			/>
 		</section>
 	);
 };

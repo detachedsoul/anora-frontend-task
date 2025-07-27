@@ -1,11 +1,12 @@
 import FormInput from "@/components/form/input";
 import Button from "@/components/form/button";
+import successToast from "@/utils/success-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useUserTasks } from "@/hooks/use-user-tasks";
-import successToast from "@/utils/success-toast";
 import { cn } from "@/utils/cn";
+import { XIcon } from "lucide-react";
 
 const taskSchema = z.object({
 	title: z.string().min(1, "Title is required"),
@@ -19,7 +20,13 @@ const taskSchema = z.object({
 
 type TaskInput = z.infer<typeof taskSchema>;
 
-const AddTask = () => {
+const AddTask = ({
+	isModalActive,
+	setIsModalActive,
+}: {
+	isModalActive: boolean;
+	setIsModalActive: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
 	const { addTask, rehydrateStore } = useUserTasks();
 
 	const {
@@ -47,6 +54,8 @@ const AddTask = () => {
 
 		rehydrateStore();
 
+        setIsModalActive(false);
+
 		successToast({
 			header: "Task Added",
 			message: "New task added successfully.",
@@ -54,104 +63,128 @@ const AddTask = () => {
 	};
 
 	return (
-		<form
-			className="grid gap-6"
-			onSubmit={handleSubmit(createTask)}
+		<div
+			className={cn(
+				"fixed max-h-[90dvh] h-[90dvh] overflow-y-auto bg-gray-950 border border-gray-950 w-[calc((100%-2rem)+0.25rem)] rounded-t-lg px-4 pb-4 pt-2 outline outline-offset-4 outline-double outline-gray-800 transition-all duration-300 ease-in-out md:w-[calc((80%-2rem)+0.25rem)] lg:w-[calc((50%-2rem)+0.25rem)] flex flex-col gap-10 custom-scrollbar z-[9999]",
+				{
+					"bottom-0": isModalActive,
+					"-bottom-full": !isModalActive,
+				},
+			)}
 		>
-			<label
-				className="grid gap-2"
-				htmlFor="title"
-			>
-				<span className="header">Title</span>
-
-				<FormInput
-					type="text"
-					placeholder="Enter title"
-					{...register("title")}
-					error={errors?.title?.message}
-				/>
-			</label>
-
-			<label
-				className="grid gap-2"
-				htmlFor="description"
-			>
-				<span className="header">Description</span>
-
-				<textarea
-					className={cn("input", {
-						"border-brand-red": errors?.description?.message,
-					})}
-					id="description"
-					placeholder="Enter task description"
-					{...register("description")}
-					rows={3}
-				></textarea>
-
-				{errors && (
-					<p className="text-brand-red text-sm">
-						{errors?.description?.message}
-					</p>
-				)}
-			</label>
-
-			<label
-				htmlFor="dueDate"
-				className="grid gap-2"
-			>
-				<span className="header">Due Date</span>
-
-				<FormInput
-					className="date-input"
-					placeholder="Enter due date"
-					{...register("dueDate")}
-					type="date"
-					error={errors?.dueDate?.message}
-				/>
-			</label>
-
-			<label
-				htmlFor="status"
-				className="grid gap-2"
-			>
-				<span className="header">Status</span>
-
-				<select
-					className="select-input"
-					id="status"
-					{...register("status")}
-					defaultValue={watch("status")}
+			<div className="ml-auto sticky top-0 -mr-2 bg-gray-800 z-50 rounded-full grid place-content-center">
+				<button
+					className="bg-gray-800 p-1 rounded-full"
+					type="button"
+					onClick={() => setIsModalActive(false)}
+					aria-label="Close modal"
 				>
-					<option value="pending">Pending</option>
-					<option value="completed">Completed</option>
-				</select>
-			</label>
+					<XIcon
+						strokeWidth={1.2}
+						size={18}
+					/>
+				</button>
+			</div>
 
-			<label
-				htmlFor="priority"
-				className="grid gap-2"
+			<form
+				className="grid gap-6"
+				onSubmit={handleSubmit(createTask)}
 			>
-				<span className="header">Priority</span>
-
-				<select
-					className="select-input"
-					id="priority"
-					{...register("priority")}
-					defaultValue={watch("priority")}
+				<label
+					className="grid gap-2"
+					htmlFor="title"
 				>
-					<option value="low">Low</option>
-					<option value="medium">Medium</option>
-					<option value="high">High</option>
-				</select>
-			</label>
+					<span className="header">Title</span>
 
-			<Button
-				type="submit"
-				disabled={!isValid}
-			>
-				Add Task
-			</Button>
-		</form>
+					<FormInput
+						type="text"
+						placeholder="Enter title"
+						{...register("title")}
+						error={errors?.title?.message}
+					/>
+				</label>
+
+				<label
+					className="grid gap-2"
+					htmlFor="description"
+				>
+					<span className="header">Description</span>
+
+					<textarea
+						className={cn("input", {
+							"border-brand-red": errors?.description?.message,
+						})}
+						id="description"
+						placeholder="Enter task description"
+						{...register("description")}
+						rows={3}
+					></textarea>
+
+					{errors && (
+						<p className="text-brand-red text-sm">
+							{errors?.description?.message}
+						</p>
+					)}
+				</label>
+
+				<label
+					htmlFor="dueDate"
+					className="grid gap-2"
+				>
+					<span className="header">Due Date</span>
+
+					<FormInput
+						className="date-input"
+						placeholder="Enter due date"
+						{...register("dueDate")}
+						type="date"
+						error={errors?.dueDate?.message}
+					/>
+				</label>
+
+				<label
+					htmlFor="status"
+					className="grid gap-2"
+				>
+					<span className="header">Status</span>
+
+					<select
+						className="select-input"
+						id="status"
+						{...register("status")}
+						defaultValue={watch("status")}
+					>
+						<option value="pending">Pending</option>
+						<option value="completed">Completed</option>
+					</select>
+				</label>
+
+				<label
+					htmlFor="priority"
+					className="grid gap-2"
+				>
+					<span className="header">Priority</span>
+
+					<select
+						className="select-input"
+						id="priority"
+						{...register("priority")}
+						defaultValue={watch("priority")}
+					>
+						<option value="low">Low</option>
+						<option value="medium">Medium</option>
+						<option value="high">High</option>
+					</select>
+				</label>
+
+				<Button
+					type="submit"
+					disabled={!isValid}
+				>
+					Add Task
+				</Button>
+			</form>
+		</div>
 	);
 };
 

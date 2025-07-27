@@ -27,7 +27,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 					"btn flex items-center justify-center gap-3 text-center",
 					{
 						"cursor-not-allowed hover:outline-none": disabled || isSubmitting,
-						"bg-brand-red/50": disabled,
+						"bg-brand-red/10": disabled,
 					},
 					className,
 				)}
