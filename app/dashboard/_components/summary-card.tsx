@@ -24,7 +24,7 @@ const SummaryCard = ({
 	return (
 		<button
 			className={cn(
-				"relative text-left after:absolute after:size-full after:-bottom-1 after:left-1 after:border after:rounded-lg after:z-10 hover:after:inset-0 after:transition-all after:duration-300 after:ease-in-out",
+				"relative text-left text-white after:absolute after:size-full after:-bottom-1 after:left-1 after:border after:rounded-lg after:z-10 hover:after:inset-0 after:transition-all after:duration-300 after:ease-in-out",
 				afterBorder,
 			)}
 			type="button"

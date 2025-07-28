@@ -94,16 +94,16 @@ const AddTask = ({
 	return (
 		<div
 			className={cn(
-				"fixed max-h-[90dvh] h-[90dvh] overflow-y-auto bg-gray-950 border border-gray-950 w-[calc((100%-2rem)+0.25rem)] rounded-t-lg px-4 pb-4 pt-2 outline outline-offset-4 outline-double outline-gray-800 transition-all duration-300 ease-in-out md:w-[calc((80%-2rem)+0.25rem)] lg:w-[calc((50%-2rem)+0.25rem)] flex flex-col gap-10 custom-scrollbar z-[9999]",
+				"fixed max-h-[90dvh] h-[90dvh] bg-slate-300 overflow-y-auto dark:bg-gray-950 border border-gray-950 w-[calc((100%-2rem)+0.25rem)] rounded-t-lg px-4 pb-4 pt-2 outline outline-offset-4 outline-double outline-gray-800 transition-all duration-300 ease-in-out md:w-[calc((80%-2rem)+0.25rem)] lg:w-[calc((50%-2rem)+0.25rem)] flex flex-col gap-10 custom-scrollbar z-[9999]",
 				{
 					"bottom-0": isModalActive,
 					"-bottom-full": !isModalActive,
 				},
 			)}
 		>
-			<div className="ml-auto sticky top-0 -mr-2 bg-gray-800 z-50 rounded-full grid place-content-center">
+			<div className="ml-auto sticky top-0 -mr-2 bg-slate-400 dark:bg-gray-800 z-50 rounded-full grid place-content-center">
 				<button
-					className="bg-gray-800 p-1 rounded-full"
+					className="bg-slate-400 text-white dark:bg-gray-800 p-1 rounded-full"
 					type="button"
 					onClick={() => setIsModalActive(false)}
 					aria-label="Close modal"

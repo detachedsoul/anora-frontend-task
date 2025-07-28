@@ -4,12 +4,13 @@ import FormInput from "./form/input";
 import Button from "./form/button";
 import successToast from "@/utils/success-toast";
 import Loader from "@/app/loading";
+import ThemeToggle from "@/components/theme-toggle";
 import { z } from "zod";
 import { UserIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUserTasks } from "@/hooks/use-user-tasks";
-import { useRouter, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { useHasHydrated } from "@/hooks/use-has-hydrated";
 
 const formSchema = z.object({
@@ -20,8 +21,6 @@ const Index = () => {
 	const isHydrated = useHasHydrated();
 
 	const store = useUserTasks();
-
-	const { replace } = useRouter();
 
 	const {
 		register,
@@ -50,7 +49,7 @@ const Index = () => {
 		setUserName(name);
 		setCurrentUser(name);
 
-        replace("/dashboard");
+        window.location.replace("/dashboard");
     };
 
     if (currentUser) {
@@ -58,7 +57,11 @@ const Index = () => {
 	}
 
 	return (
-		<form className="flex flex-col place-content-center w-full gap-8 min-h-dvh h-dvh max-md:p-4 md:w-1/3 md:mx-auto">
+		<form className="flex flex-col place-content-center w-full gap-8 min-h-dvh h-dvh max-md:p-4 md:w-1/3 md:mx-auto relative">
+            <div className="fixed right-4 top-8 md:right-[33%]">
+                <ThemeToggle />
+            </div>
+
 			<div className="text-center grid gap-1">
 				<h1 className="header text-xl md:text-3xl">
 					Welcome to Taskify 👋
@@ -79,11 +82,11 @@ const Index = () => {
 						<span className="text-brand-red">*</span>
 					</span>
 
-					<div className="flex gap-3 items-center bg-gray-900 border border-gray-900 rounded-lg pl-3 focus-within:outline focus-within:outline-offset-3 focus-within:outline-gray-800 group">
+					<div className="flex gap-3 items-center bg-slate-200 dark:bg-gray-900 border border-slate-300 dark:border-gray-900 rounded-lg pl-3 focus-within:outline focus-within:outline-offset-3 focus-within:outline-slate-300 dark:focus-within:outline-gray-800 group">
 						<UserIcon strokeWidth={1.2} />
 
 						<FormInput
-							className="input bg-transparent rounded-l-none pl-0 focus:outline-none"
+							className="input bg-transparent border-none rounded-l-none pl-0 focus:outline-none"
 							type="text"
 							placeholder="Enter your name"
 							id="name"

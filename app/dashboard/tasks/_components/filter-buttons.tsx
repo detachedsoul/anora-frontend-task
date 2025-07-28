@@ -35,7 +35,7 @@ const FilterButton = ({
 				"rounded-full py-1 px-3 flex items-center justify-between header gap-4 border",
 				{
 					"bg-slate-200 text-[#111827] border-gray-800": !active,
-					"dark:bg-gray-800 text-white border-transparent": active,
+					"bg-slate-800 dark:bg-gray-800 text-white border-transparent": active,
 				},
 			)}
 		>
