@@ -1,47 +1,40 @@
-import { create } from "zustand";
-import { createJSONStorage, persist } from "zustand/middleware";
+import { useEffect, useState } from "react";
 
-type Theme = "light" | "dark" | "system";
+const useTheme = () => {
+	const [theme, setTheme] = useState<string>("light");
 
-interface ThemeState {
-	theme: Theme;
-	setTheme: (theme: Theme) => void;
-	resolvedTheme: "light" | "dark";
-}
+	useEffect(() => {
+		if (
+			localStorage.theme === "dark" ||
+			(!("theme" in localStorage) &&
+				window.matchMedia("(prefers-color-scheme: dark)").matches)
+		) {
+			document.documentElement.classList.add("dark");
 
-export const useTheme = create<ThemeState>()(
-	persist(
-		(set, get) => ({
-			theme: "system",
-			setTheme: (theme) => {
-				set({ theme });
-                const root = document.documentElement;
+			localStorage.setItem("theme", "dark");
 
-				const resolved =
-					theme === "system"
-						? window.matchMedia("(prefers-color-scheme: dark)")
-								.matches
-							? "dark"
-							: "light"
-						: theme;
+			setTheme("dark");
+		} else {
+			document.documentElement.classList.add("light");
 
-                root.classList.remove("light", "dark");
+			localStorage.setItem("theme", "light");
 
-				root.classList.add(resolved);
-			},
-			get resolvedTheme() {
-                const current = get().theme;
+			setTheme("light");
+		}
+	}, []);
 
-				return current === "system"
-					? window.matchMedia("(prefers-color-scheme: dark)").matches
-						? "dark"
-						: "light"
-					: current;
-			},
-		}),
-		{
-			name: "theme-storage",
-			storage: createJSONStorage(() => localStorage),
-		},
-	),
-);
+	const toggleTheme = (newTheme: string) => {
+		document.documentElement.classList.replace(theme, newTheme);
+
+		localStorage.setItem("theme", newTheme);
+
+		setTheme(newTheme);
+	};
+
+	return {
+		theme,
+		toggleTheme,
+	};
+};
+
+export default useTheme;

@@ -1,22 +1,18 @@
 "use client";
 
+import useTheme from "@/hooks/use-theme";
 import { useState } from "react";
-import { useTheme } from "@/hooks/use-theme";
-import { MoonIcon, SunIcon, LaptopIcon, ChevronDownIcon } from "lucide-react";
+import { MoonIcon, SunIcon, ChevronDownIcon } from "lucide-react";
 import { cn } from "@/utils/cn";
 
 const themes = [
 	{ label: "Light", value: "light", icon: <SunIcon className="size-4" /> },
 	{ label: "Dark", value: "dark", icon: <MoonIcon className="size-4" /> },
-	{
-		label: "System",
-		value: "system",
-		icon: <LaptopIcon className="size-4" />,
-	},
 ] as const;
 
 const ThemeToggle = () => {
-	const { theme, setTheme } = useTheme();
+    const { theme, toggleTheme } = useTheme();
+
 	const [open, setOpen] = useState(false);
 
 	const current = themes.find((t) => t.value === theme);
@@ -49,7 +45,8 @@ const ThemeToggle = () => {
 							type="button"
 							key={item.value}
 							onClick={() => {
-								setTheme(item.value);
+                                toggleTheme(item.value);
+
 								setOpen(false);
 							}}
 						>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Wrapper from "@/components/wrapper";
 import { Toaster } from "sonner";
 import { IBM_Plex_Mono, Urbanist } from "next/font/google";
 import "./globals.css";
@@ -28,8 +29,10 @@ export default function RootLayout({
 		<html lang="en">
 			<body
 				className={`${ibmPlexMono.variable} ${urbanist.variable} antialiased scroll-smooth font-urbanist tracking-wider bg-[#f9fafb] text-[#111827] text-base dark:bg-gray-950 dark:text-[#f8fafc]`}
-			>
-				{children}
+            >
+                <Wrapper>
+				    {children}
+                </Wrapper>
 
 				<Toaster richColors />
 			</body>
